@@ -33,17 +33,26 @@ export async function PATCH(
         .from(notifications)
         .where(eq(notifications.referenceId, id));
 
+      console.log('Order ID:', id);
+      console.log('Provided OTP:', otp);
+      console.log('Found notifications:', orderNotifications.length);
+
       const notificationWithOtp = orderNotifications.find(n => {
         if (n.metadata) {
           try {
             const metadata = JSON.parse(n.metadata as string);
-            return metadata.otp === otp;
-          } catch {
+            console.log('Notification metadata:', metadata);
+            // Compare as strings to avoid type issues
+            return metadata.otp && metadata.otp.toString() === otp.toString();
+          } catch (e) {
+            console.error('Error parsing metadata:', e);
             return false;
           }
         }
         return false;
       });
+
+      console.log('Notification with matching OTP found:', !!notificationWithOtp);
 
       if (!notificationWithOtp) {
         return NextResponse.json(

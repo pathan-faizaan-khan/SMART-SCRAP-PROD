@@ -6,10 +6,10 @@ import { eq } from 'drizzle-orm';
 // PATCH - Update bid status (accept/reject)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body: { status: string; sellerResponse?: string } = await request.json();
     const { status, sellerResponse } = body;
 
@@ -100,6 +100,8 @@ export async function PATCH(
         type: 'offer_accepted',
         title: 'Bid Accepted!',
         message: `Your bid has been accepted! Please proceed with the order.`,
+        referenceType: 'order',
+        referenceId: newTransaction.id,
         metadata: JSON.stringify({ 
           bidId: bid.id, 
           transactionId: newTransaction.id,
@@ -113,6 +115,8 @@ export async function PATCH(
         type: 'new_offer',
         title: 'Order Created',
         message: `Order created from accepted bid. OTP: ${otp}`,
+        referenceType: 'order',
+        referenceId: newTransaction.id,
         metadata: JSON.stringify({ 
           bidId: bid.id, 
           transactionId: newTransaction.id,
@@ -148,10 +152,10 @@ export async function PATCH(
 // DELETE - Cancel bid (buyer only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const [bid] = await db
       .select()
