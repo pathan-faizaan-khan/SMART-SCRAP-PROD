@@ -6,9 +6,10 @@ import { eq } from 'drizzle-orm';
 // PATCH - Update order status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json() as {
       status?: string;
       paymentStatus?: string;
@@ -30,7 +31,7 @@ export async function PATCH(
       const orderNotifications = await db
         .select()
         .from(notifications)
-        .where(eq(notifications.referenceId, params.id));
+        .where(eq(notifications.referenceId, id));
 
       const notificationWithOtp = orderNotifications.find(n => {
         if (n.metadata) {
@@ -74,7 +75,7 @@ export async function PATCH(
     const [updatedOrder] = await db
       .update(transactions)
       .set(updateData)
-      .where(eq(transactions.id, params.id))
+      .where(eq(transactions.id, id))
       .returning();
 
     if (!updatedOrder) {
@@ -90,7 +91,7 @@ export async function PATCH(
       const existingNotifications = await db
         .select()
         .from(notifications)
-        .where(eq(notifications.referenceId, params.id));
+        .where(eq(notifications.referenceId, id));
 
       const existingOtpNotification = existingNotifications.find(n => {
         if (n.metadata) {
@@ -116,7 +117,7 @@ export async function PATCH(
           title: 'Order Out for Pickup',
           message: `Order is out for pickup. OTP for completion: ${otp}`,
           referenceType: 'order',
-          referenceId: params.id,
+          referenceId: id,
           metadata: JSON.stringify({ otp }),
         });
 
@@ -127,7 +128,7 @@ export async function PATCH(
           title: 'Order Status Updated',
           message: `Your order is now out for pickup. You'll need the seller's OTP to complete.`,
           referenceType: 'order',
-          referenceId: params.id,
+          referenceId: id,
         });
       }
     }
@@ -150,7 +151,7 @@ export async function PATCH(
         title: 'Order Completed',
         message: `Order #${updatedOrder.id.slice(0, 8)} has been completed. Amount: ₹${(updatedOrder.sellerAmount / 100).toFixed(2)}`,
         referenceType: 'order',
-        referenceId: params.id,
+        referenceId: id,
       });
 
       await db.insert(notifications).values({
@@ -159,7 +160,7 @@ export async function PATCH(
         title: 'Order Completed',
         message: `Your order has been completed successfully. Thank you for using SmartScrap!`,
         referenceType: 'order',
-        referenceId: params.id,
+        referenceId: id,
       });
     }
 
@@ -180,7 +181,7 @@ export async function PATCH(
         title: 'Order Cancelled',
         message: `Order #${updatedOrder.id.slice(0, 8)} has been cancelled.`,
         referenceType: 'order',
-        referenceId: params.id,
+        referenceId: id,
       });
 
       await db.insert(notifications).values({
@@ -189,7 +190,7 @@ export async function PATCH(
         title: 'Order Cancelled',
         message: `Your order has been cancelled. The listing is now available again.`,
         referenceType: 'order',
-        referenceId: params.id,
+        referenceId: id,
       });
     }
 
