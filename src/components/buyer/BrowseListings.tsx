@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import ListingDetailModal from './ListingDetailModal';
+import PlaceBidModal from './PlaceBidModal';
 
 interface BrowseListingsProps {
   buyerId: string;
@@ -19,6 +20,8 @@ export default function BrowseListings({ buyerId }: BrowseListingsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [listingForBid, setListingForBid] = useState<any>(null);
 
   const categories = [
     'all', 'plastic', 'paper', 'glass', 'cardboard', 'metal', 
@@ -215,14 +218,9 @@ export default function BrowseListings({ buyerId }: BrowseListingsProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-baseline gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                    <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
-                    <span className="text-xl sm:text-2xl font-bold text-teal-600">
-                      {(listing.totalPrice / 100).toFixed(2)}
-                    </span>
-                    <span className="text-xs sm:text-sm text-gray-500">
-                      (₹{(listing.pricePerKg / 100).toFixed(2)}/kg)
-                    </span>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3 sm:mb-4">
+                    <p className="text-xs sm:text-sm text-blue-800 font-medium">Bidding Available</p>
+                    <p className="text-xs text-blue-600">Place your offer for this listing</p>
                   </div>
 
                   <div className="flex gap-2">
@@ -238,8 +236,8 @@ export default function BrowseListings({ buyerId }: BrowseListingsProps) {
                       onClick={() => setSelectedListing(listing)}
                       className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-xs sm:text-sm h-8 sm:h-10"
                     >
-                      <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      Buy
+                      <IndianRupee className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      Place Bid
                     </Button>
                   </div>
                 </CardContent>
@@ -257,7 +255,29 @@ export default function BrowseListings({ buyerId }: BrowseListingsProps) {
           isSaved={savedListings.has(selectedListing.id)}
           onClose={() => setSelectedListing(null)}
           onToggleSave={() => toggleSaveListing(selectedListing.id)}
-          onOrderPlaced={fetchListings}
+          onPlaceBid={() => {
+            setListingForBid(selectedListing);
+            setShowBidModal(true);
+            setSelectedListing(null);
+          }}
+        />
+      )}
+
+      {/* Place Bid Modal */}
+      {showBidModal && listingForBid && (
+        <PlaceBidModal
+          isOpen={showBidModal}
+          onClose={() => {
+            setShowBidModal(false);
+            setListingForBid(null);
+          }}
+          listing={listingForBid}
+          buyerId={buyerId}
+          onSuccess={() => {
+            setShowBidModal(false);
+            setListingForBid(null);
+            fetchListings();
+          }}
         />
       )}
     </div>

@@ -47,6 +47,7 @@ import NotificationPanel from '@/components/dashboard/NotificationPanel';
 import NewListingModal from '@/components/dashboard/NewListingModal';
 import BuyerDashboard from '@/components/buyer/BuyerDashboard';
 import SellerOrders from '@/components/dashboard/SellerOrders';
+import SellerBids from '@/components/dashboard/SellerBids';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -145,6 +146,8 @@ export default function Dashboard() {
     switch (activeTab) {
       case 'listings':
         return <ListingsContent onNewListing={() => setShowNewListing(true)} userId={userProfile?.id} />;
+      case 'bids':
+        return <SellerBids sellerId={userProfile?.id} />;
       case 'orders':
         return <SellerOrders sellerId={userProfile?.id} />;
       case 'history':
@@ -191,7 +194,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-teal-50 to-cyan-50 pb-24 lg:pb-0">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-teal-50 to-cyan-50 pb-28 lg:pb-0">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-40 shadow-lg shadow-teal-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -326,6 +329,14 @@ export default function Dashboard() {
                   <span>My Listings</span>
                 </Button>
                 <Button 
+                  variant={activeTab === 'bids' ? 'default' : 'ghost'}
+                  onClick={() => setActiveTab('bids')}
+                  className={`w-full justify-start h-12 rounded-xl font-medium text-base ${activeTab === 'bids' ? 'bg-linear-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-lg shadow-teal-500/30' : 'hover:bg-teal-50'}`}
+                >
+                  <TrendingUp className="w-5 h-5 mr-3" />
+                  <span>Bids</span>
+                </Button>
+                <Button 
                   variant={activeTab === 'orders' ? 'default' : 'ghost'}
                   onClick={() => setActiveTab('orders')}
                   className={`w-full justify-start h-12 rounded-xl font-medium text-base ${activeTab === 'orders' ? 'bg-linear-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-lg shadow-teal-500/30' : 'hover:bg-teal-50'}`}
@@ -376,17 +387,33 @@ export default function Dashboard() {
 
       {/* Bottom Navigation (Mobile) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-gray-200 shadow-2xl z-50">
-        <div className="grid grid-cols-5 h-20">
+        <div className="grid grid-cols-5 h-16">
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center justify-center gap-1 transition-all ${
               activeTab === 'dashboard' ? 'text-teal-600' : 'text-gray-500'
             }`}
           >
-            <div className={`p-2 rounded-2xl transition-all ${activeTab === 'dashboard' ? 'bg-teal-100' : ''}`}>
-              <Home className="w-6 h-6" strokeWidth={activeTab === 'dashboard' ? 2.5 : 2} />
-            </div>
+            <Home className="w-5 h-5" strokeWidth={activeTab === 'dashboard' ? 2.5 : 2} />
             <span className="text-xs font-semibold">Home</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('bids')}
+            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+              activeTab === 'bids' ? 'text-teal-600' : 'text-gray-500'
+            }`}
+          >
+            <TrendingUp className="w-5 h-5" strokeWidth={activeTab === 'bids' ? 2.5 : 2} />
+            <span className="text-xs font-semibold">Bids</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+              activeTab === 'orders' ? 'text-teal-600' : 'text-gray-500'
+            }`}
+          >
+            <ShoppingCart className="w-5 h-5" strokeWidth={activeTab === 'orders' ? 2.5 : 2} />
+            <span className="text-xs font-semibold">Orders</span>
           </button>
           <button
             onClick={() => setActiveTab('listings')}
@@ -394,18 +421,8 @@ export default function Dashboard() {
               activeTab === 'listings' ? 'text-teal-600' : 'text-gray-500'
             }`}
           >
-            <div className={`p-2 rounded-2xl transition-all ${activeTab === 'listings' ? 'bg-teal-100' : ''}`}>
-              <Package2 className="w-6 h-6" strokeWidth={activeTab === 'listings' ? 2.5 : 2} />
-            </div>
+            <Package2 className="w-5 h-5" strokeWidth={activeTab === 'listings' ? 2.5 : 2} />
             <span className="text-xs font-semibold">Listings</span>
-          </button>
-          <button
-            onClick={() => setShowNewListing(true)}
-            className="flex flex-col items-center justify-center relative -mt-6"
-          >
-            <div className="w-16 h-16 bg-linear-to-br from-teal-500 via-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-teal-500/50 ring-4 ring-white">
-              <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
-            </div>
           </button>
           <button
             onClick={() => setActiveTab('wallet')}
@@ -413,21 +430,36 @@ export default function Dashboard() {
               activeTab === 'wallet' ? 'text-teal-600' : 'text-gray-500'
             }`}
           >
-            <div className={`p-2 rounded-2xl transition-all ${activeTab === 'wallet' ? 'bg-teal-100' : ''}`}>
-              <Wallet className="w-6 h-6" strokeWidth={activeTab === 'wallet' ? 2.5 : 2} />
-            </div>
+            <Wallet className="w-5 h-5" strokeWidth={activeTab === 'wallet' ? 2.5 : 2} />
             <span className="text-xs font-semibold">Wallet</span>
+          </button>
+        </div>
+        {/* Second Row for Additional Tabs */}
+        <div className="grid grid-cols-3 h-12 border-t border-gray-100">
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center justify-center gap-2 transition-all ${
+              activeTab === 'history' ? 'text-teal-600 bg-teal-50' : 'text-gray-500'
+            }`}
+          >
+            <FileText className="w-4 h-4" strokeWidth={activeTab === 'history' ? 2.5 : 2} />
+            <span className="text-xs font-semibold">History</span>
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`flex flex-col items-center justify-center gap-1 transition-all ${
-              activeTab === 'settings' ? 'text-teal-600' : 'text-gray-500'
+            className={`flex items-center justify-center gap-2 transition-all ${
+              activeTab === 'settings' ? 'text-teal-600 bg-teal-50' : 'text-gray-500'
             }`}
           >
-            <div className={`p-2 rounded-2xl transition-all ${activeTab === 'settings' ? 'bg-teal-100' : ''}`}>
-              <Settings className="w-6 h-6" strokeWidth={activeTab === 'settings' ? 2.5 : 2} />
-            </div>
+            <Settings className="w-4 h-4" strokeWidth={activeTab === 'settings' ? 2.5 : 2} />
             <span className="text-xs font-semibold">Settings</span>
+          </button>
+          <button
+            onClick={() => setShowNewListing(true)}
+            className="flex items-center justify-center gap-2 bg-linear-to-r from-teal-500 to-emerald-500 text-white"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span className="text-xs font-semibold">New Listing</span>
           </button>
         </div>
       </nav>

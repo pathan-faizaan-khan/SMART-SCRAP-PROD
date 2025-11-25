@@ -43,8 +43,6 @@ export async function POST(request: NextRequest) {
       description: string;
       category: string;
       weight: string;
-      pricePerKg: string;
-      totalPrice?: string;
       pickupAddress: string;
       city: string;
       state: string;
@@ -58,8 +56,6 @@ export async function POST(request: NextRequest) {
       description,
       category,
       weight,
-      pricePerKg,
-      totalPrice,
       pickupAddress,
       city,
       state,
@@ -69,7 +65,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validation
-    if (!sellerId || !title || !description || !category || !weight || !pricePerKg || !pickupAddress || !city || !state || !pincode) {
+    if (!sellerId || !title || !description || !category || !weight || !pickupAddress || !city || !state || !pincode) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -77,8 +73,6 @@ export async function POST(request: NextRequest) {
     }
 
     const weightNum = parseInt(weight);
-    const pricePerKgNum = parseInt(pricePerKg);
-    const totalPriceNum = totalPrice ? parseInt(totalPrice) : (weightNum * pricePerKgNum);
 
     const [listing] = await db
       .insert(listings)
@@ -88,8 +82,6 @@ export async function POST(request: NextRequest) {
         description,
         category,
         weight: weightNum,
-        pricePerKg: pricePerKgNum,
-        totalPrice: totalPriceNum,
         pickupAddress,
         city,
         state,
@@ -161,7 +153,6 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const listingId = searchParams.get('listingId');
-
     if (!listingId) {
       return NextResponse.json(
         { error: 'Listing ID is required' },

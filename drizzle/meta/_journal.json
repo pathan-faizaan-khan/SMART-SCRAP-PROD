@@ -15,6 +15,13 @@
       "when": 1763992567704,
       "tag": "0001_petite_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764047110513,
+      "tag": "0002_yielding_darkhawk",
+      "breakpoints": true
     }
   ]
 }

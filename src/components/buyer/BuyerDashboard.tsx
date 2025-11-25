@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Package, ShoppingCart, Heart, User, Settings, LogOut } from 'lucide-react';
+import { Package, ShoppingCart, Heart, User, Settings, LogOut, IndianRupee } from 'lucide-react';
 import BrowseListings from './BrowseListings';
 import MyOrders from './MyOrders';
+import MyBids from './MyBids';
 import SavedListings from './SavedListings';
 import BuyerProfile from './BuyerProfile';
 
@@ -18,6 +19,7 @@ export default function BuyerDashboard({ user, userProfile, onLogout }: BuyerDas
 
   const tabs = [
     { id: 'browse', label: 'Browse Listings', icon: Package },
+    { id: 'bids', label: 'My Bids', icon: IndianRupee },
     { id: 'orders', label: 'My Orders', icon: ShoppingCart },
     { id: 'saved', label: 'Saved', icon: Heart },
     { id: 'profile', label: 'Profile', icon: User },
@@ -27,6 +29,8 @@ export default function BuyerDashboard({ user, userProfile, onLogout }: BuyerDas
     switch (activeTab) {
       case 'browse':
         return <BrowseListings buyerId={userProfile?.id} />;
+      case 'bids':
+        return <MyBids buyerId={userProfile?.id} />;
       case 'orders':
         return <MyOrders buyerId={userProfile?.id} />;
       case 'saved':
@@ -97,7 +101,7 @@ export default function BuyerDashboard({ user, userProfile, onLogout }: BuyerDas
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-5 h-16">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

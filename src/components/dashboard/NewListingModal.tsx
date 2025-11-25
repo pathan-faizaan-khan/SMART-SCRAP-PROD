@@ -29,7 +29,6 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
     description: '',
     category: 'plastic',
     weight: '',
-    pricePerKg: '',
     pickupAddress: '',
     city: '',
     state: '',
@@ -177,8 +176,6 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
       }
 
       const weight = parseInt(formData.weight);
-      const pricePerKg = parseFloat(formData.pricePerKg) * 100; // Convert to paise
-      const totalPrice = weight * pricePerKg;
 
       const response = await fetch('/api/listings', {
         method: 'POST',
@@ -187,8 +184,8 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
           ...formData,
           sellerId: userId,
           weight,
-          pricePerKg: Math.round(pricePerKg),
-          totalPrice: Math.round(totalPrice),
+          pricePerKg: 0, // Price will be determined by bids
+          totalPrice: 0, // Price will be determined by bids
           status: 'active',
           images: JSON.stringify(uploadedImageUrls),
         }),
@@ -210,7 +207,6 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
           description: '',
           category: 'plastic',
           weight: '',
-          pricePerKg: '',
           pickupAddress: '',
           city: '',
           state: '',
@@ -230,12 +226,6 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
   };
 
   if (!isOpen) return null;
-
-  const calculateTotal = () => {
-    const weight = parseFloat(formData.weight) || 0;
-    const pricePerKg = parseFloat(formData.pricePerKg) || 0;
-    return (weight * pricePerKg).toFixed(2);
-  };
 
   return (
     <>
@@ -399,31 +389,12 @@ export default function NewListingModal({ isOpen, onClose, userId, onSuccess }: 
                     className="mt-1"
                   />
                 </div>
-
-                <div>
-                  <Label htmlFor="pricePerKg">Price per kg (₹) *</Label>
-                  <div className=" mt-1">
-                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="pricePerKg"
-                      name="pricePerKg"
-                      type="number"
-                      value={formData.pricePerKg}
-                      onChange={handleChange}
-                      placeholder="15.00"
-                      required
-                      min="0.01"
-                      step="0.01"
-                      className="pl-9"
-                    />
-                  </div>
-                </div>
               </div>
 
-              <Card className="bg-teal-50 border-teal-200 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-medium">Total Price:</span>
-                  <span className="text-2xl font-bold text-teal-600">₹{calculateTotal()}</span>
+              <Card className="bg-blue-50 border-blue-200 p-4">
+                <div className="text-sm text-gray-700">
+                  <p className="font-medium text-blue-900">📢 Bidding System</p>
+                  <p className="mt-1">Buyers will place bids on your listing. You can review all bids and choose the best offer!</p>
                 </div>
               </Card>
             </div>

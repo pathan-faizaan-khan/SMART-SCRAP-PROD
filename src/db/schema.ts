@@ -138,10 +138,8 @@ export const listings = pgTable('listings', {
   description: text('description').notNull(),
   category: scrapCategoryEnum('category').notNull(),
   
-  // Quantity & Pricing
+  // Quantity
   weight: integer('weight').notNull(), // in kg
-  pricePerKg: integer('price_per_kg').notNull(), // in paise
-  totalPrice: integer('total_price').notNull(), // in paise
   
   // Location
   pickupAddress: text('pickup_address').notNull(),
@@ -176,10 +174,48 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
 
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'processing', 'completed', 'failed', 'refunded']);
 
+// Bid Status
+export const bidStatusEnum = pgEnum('bid_status', [
+  'pending', 'accepted', 'rejected', 'cancelled', 'expired'
+]);
+
+// Bids Table (Buyers place bids on listings)
+export const bids = pgTable('bids', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  listingId: uuid('listing_id').notNull().references(() => listings.id, { onDelete: 'cascade' }),
+  buyerId: uuid('buyer_id').notNull().references(() => userProfiles.id),
+  sellerId: uuid('seller_id').notNull().references(() => userProfiles.id),
+  
+  // Bid Details
+  pricePerKg: integer('price_per_kg').notNull(), // in paise - buyer's offer
+  quantity: integer('quantity').notNull(), // in kg - how much buyer wants
+  totalAmount: integer('total_amount').notNull(), // in paise - calculated total
+  
+  // Pickup Details (from buyer)
+  pickupDate: timestamp('pickup_date'),
+  pickupTimeSlot: varchar('pickup_time_slot', { length: 50 }),
+  paymentMethod: varchar('payment_method', { length: 50 }),
+  
+  // Status
+  status: bidStatusEnum('status').notNull().default('pending'),
+  
+  // Notes
+  buyerNotes: text('buyer_notes'),
+  sellerResponse: text('seller_response'),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  acceptedAt: timestamp('accepted_at'),
+  rejectedAt: timestamp('rejected_at'),
+  expiresAt: timestamp('expires_at'), // Optional bid expiration
+});
+
 // Transactions Table
 export const transactions = pgTable('transactions', {
   id: uuid('id').primaryKey().defaultRandom(),
   listingId: uuid('listing_id').notNull().references(() => listings.id, { onDelete: 'cascade' }),
+  bidId: uuid('bid_id').references(() => bids.id), // Reference to accepted bid
   sellerId: uuid('seller_id').notNull().references(() => userProfiles.id),
   buyerId: uuid('buyer_id').notNull().references(() => userProfiles.id),
   
